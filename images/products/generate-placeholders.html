@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Placeholder Images</title>
+</head>
+<body>
+    <h1>Placeholder Images Generated</h1>
+    <p>Right-click each image and "Save As" to save them to the products folder</p>
+
+    <div id="images"></div>
+
+    <script>
+        const placeholders = [
+            { name: 'dress-1.jpg', color: '#8B4789', text: 'Evening Gown' },
+            { name: 'dress-2.jpg', color: '#FF6B9D', text: 'Summer Dress' },
+            { name: 'dress-3.jpg', color: '#1A1A1A', text: 'Cocktail Dress' },
+            { name: 'dress-4.jpg', color: '#D4A76A', text: 'Boho Maxi' },
+            { name: 'dress-5.jpg', color: '#FFB6C1', text: 'Wedding Guest' },
+            { name: 'dress-6.jpg', color: '#DC143C', text: 'Red Carpet' },
+            { name: 'dress-7.jpg', color: '#E6E6FA', text: 'Lace Party' },
+            { name: 'dress-8.jpg', color: '#4A5568', text: 'Satin Slip' },
+            { name: 'men-1.jpg', color: '#000000', text: 'Tuxedo' },
+            { name: 'men-2.jpg', color: '#1E3A8A', text: 'Navy Suit' },
+            { name: 'men-3.jpg', color: '#374151', text: 'Grey Suit' },
+            { name: 'men-4.jpg', color: '#7C2D2D', text: 'Burgundy Jacket' },
+            { name: 'men-5.jpg', color: '#F5F5DC', text: 'Linen Suit' },
+            { name: 'men-6.jpg', color: '#4B0082', text: 'Velvet Blazer' },
+            { name: 'kids-1.jpg', color: '#FFB6D9', text: 'Princess Gown' },
+            { name: 'kids-2.jpg', color: '#2C5F8D', text: 'Gentleman Suit' },
+            { name: 'kids-3.jpg', color: '#FADADD', text: 'Flower Girl' },
+            { name: 'kids-4.jpg', color: '#1C1C1C', text: 'Junior Tuxedo' },
+            { name: 'kids-5.jpg', color: '#FF69B4', text: 'Party Dress' },
+            { name: 'kids-6.jpg', color: '#36454F', text: 'Formal Vest' }
+        ];
+
+        const container = document.getElementById('images');
+
+        placeholders.forEach(item => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 400;
+            canvas.height = 500;
+            const ctx = canvas.getContext('2d');
+
+            // Background
+            ctx.fillStyle = item.color;
+            ctx.fillRect(0, 0, 400, 500);
+
+            // Add gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, 500);
+            gradient.addColorStop(0, 'rgba(255,255,255,0.1)');
+            gradient.addColorStop(1, 'rgba(0,0,0,0.2)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 400, 500);
+
+            // Text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(item.text, 200, 250);
+
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'inline-block';
+            wrapper.style.margin = '10px';
+
+            const label = document.createElement('p');
+            label.textContent = item.name;
+            label.style.textAlign = 'center';
+
+            wrapper.appendChild(canvas);
+            wrapper.appendChild(label);
+            container.appendChild(wrapper);
+        });
+    </script>
+</body>
+</html>
