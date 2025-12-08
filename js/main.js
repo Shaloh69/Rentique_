@@ -6,6 +6,64 @@ let allProducts = [];
 let filteredProducts = [];
 let currentCategory = 'all';
 
+// Cart and Wishlist (stored in localStorage)
+let cart = JSON.parse(localStorage.getItem('rentique_cart')) || [];
+let wishlist = JSON.parse(localStorage.getItem('rentique_wishlist')) || [];
+
+// Update cart and wishlist counts
+function updateCounts() {
+    const cartCount = document.getElementById('cart-count');
+    const wishlistCount = document.getElementById('wishlist-count');
+
+    if (cartCount) cartCount.textContent = cart.length;
+    if (wishlistCount) wishlistCount.textContent = wishlist.length;
+}
+
+// Add to cart
+function addToCart(productId) {
+    const product = allProducts.find(p => p.id === productId);
+    if (product && !cart.find(item => item.id === productId)) {
+        cart.push(product);
+        localStorage.setItem('rentique_cart', JSON.stringify(cart));
+        updateCounts();
+        showNotification(`${product.name} added to cart`);
+    }
+}
+
+// Add to wishlist
+function addToWishlist(productId) {
+    const product = allProducts.find(p => p.id === productId);
+    if (product && !wishlist.find(item => item.id === productId)) {
+        wishlist.push(product);
+        localStorage.setItem('rentique_wishlist', JSON.stringify(wishlist));
+        updateCounts();
+        showNotification(`${product.name} added to wishlist`);
+    }
+}
+
+// View cart
+function viewCart() {
+    if (cart.length === 0) {
+        showNotification('Your cart is empty');
+        return;
+    }
+
+    const cartMessage = cart.map(item => `${item.name} - $${item.price.toFixed(2)}`).join('\n');
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+    showCartModal();
+}
+
+// View wishlist
+function viewWishlist() {
+    if (wishlist.length === 0) {
+        showNotification('Your wishlist is empty');
+        return;
+    }
+
+    showWishlistModal();
+}
+
 // Load products from JSON
 async function loadProducts() {
     try {
@@ -140,11 +198,19 @@ function showProductModal(productId) {
                     <div class="modal-category">${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</div>
                     <div class="modal-price">$${product.price.toFixed(2)}</div>
                     <p class="modal-description">${product.description}</p>
+                    <div class="modal-actions">
+                        <button class="btn-add-cart" onclick="addToCart(${product.id}); closeModal();">
+                            Add to Cart
+                        </button>
+                        <button class="btn-add-wishlist" onclick="addToWishlist(${product.id}); closeModal();">
+                            Add to Wishlist
+                        </button>
+                    </div>
                     <button class="btn-order-large" onclick="orderProduct(${product.id})">
                         Order on Facebook
                     </button>
                     <div class="modal-note">
-                        <small>Click "Order on Facebook" to connect with us and place your order</small>
+                        <small>Add to cart or order directly on Facebook</small>
                     </div>
                 </div>
             </div>
@@ -246,6 +312,43 @@ document.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }
     });
+
+    // Update counts on load
+    updateCounts();
+
+    // Setup mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const mobileNav = document.querySelector('.mobile-nav');
+
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenuBtn.classList.toggle('active');
+            mobileNav.classList.toggle('active');
+        });
+    }
+
+    // Mobile nav items
+    const mobileNavItems = document.querySelectorAll('.mobile-nav li');
+    mobileNavItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const page = item.dataset.page;
+            navigateToPage(page);
+            mobileMenuBtn.classList.remove('active');
+            mobileNav.classList.remove('active');
+        });
+    });
+
+    // Cart and wishlist buttons
+    const cartBtn = document.querySelector('.cart-btn');
+    const wishlistBtn = document.querySelector('.wishlist-btn');
+
+    if (cartBtn) {
+        cartBtn.addEventListener('click', viewCart);
+    }
+
+    if (wishlistBtn) {
+        wishlistBtn.addEventListener('click', viewWishlist);
+    }
 });
 
 // Setup navigation
@@ -298,6 +401,157 @@ function setupNavigation() {
             window.location.href = 'products.html';
         });
     }
+}
+
+// Navigate to page function
+function navigateToPage(page) {
+    switch(page) {
+        case 'index':
+            window.location.href = 'index.html';
+            break;
+        case 'products':
+            window.location.href = 'products.html';
+            break;
+        case 'about':
+            window.location.href = 'index.html#mission';
+            break;
+        case 'contact':
+            window.location.href = 'index.html#footer';
+            break;
+    }
+}
+
+// Show Cart Modal
+function showCartModal() {
+    if (cart.length === 0) {
+        showNotification('Your cart is empty');
+        return;
+    }
+
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+    const modal = document.createElement('div');
+    modal.className = 'product-modal';
+    modal.innerHTML = `
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div class="cart-modal">
+                <h2 class="modal-title">Your Cart</h2>
+                <div class="cart-items">
+                    ${cart.map(item => `
+                        <div class="cart-item">
+                            <img src="${item.image}" alt="${item.name}">
+                            <div class="cart-item-details">
+                                <div class="cart-item-name">${item.name}</div>
+                                <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                            </div>
+                            <button class="remove-btn" onclick="removeFromCart(${item.id})">Remove</button>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="cart-total">
+                    <strong>Total: $${total.toFixed(2)}</strong>
+                </div>
+                <button class="btn-order-large" onclick="orderCart()">
+                    Order via Facebook
+                </button>
+                <button class="btn-clear-cart" onclick="clearCart()">Clear Cart</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+// Show Wishlist Modal
+function showWishlistModal() {
+    if (wishlist.length === 0) {
+        showNotification('Your wishlist is empty');
+        return;
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'product-modal';
+    modal.innerHTML = `
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div class="cart-modal">
+                <h2 class="modal-title">Your Wishlist</h2>
+                <div class="cart-items">
+                    ${wishlist.map(item => `
+                        <div class="cart-item">
+                            <img src="${item.image}" alt="${item.name}">
+                            <div class="cart-item-details">
+                                <div class="cart-item-name">${item.name}</div>
+                                <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                            </div>
+                            <button class="add-to-cart-btn" onclick="moveToCart(${item.id})">Add to Cart</button>
+                            <button class="remove-btn" onclick="removeFromWishlist(${item.id})">Remove</button>
+                        </div>
+                    `).join('')}
+                </div>
+                <button class="btn-clear-cart" onclick="clearWishlist()">Clear Wishlist</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+// Remove from cart
+function removeFromCart(productId) {
+    cart = cart.filter(item => item.id !== productId);
+    localStorage.setItem('rentique_cart', JSON.stringify(cart));
+    updateCounts();
+    closeModal();
+    showNotification('Item removed from cart');
+}
+
+// Remove from wishlist
+function removeFromWishlist(productId) {
+    wishlist = wishlist.filter(item => item.id !== productId);
+    localStorage.setItem('rentique_wishlist', JSON.stringify(wishlist));
+    updateCounts();
+    closeModal();
+    showNotification('Item removed from wishlist');
+}
+
+// Move from wishlist to cart
+function moveToCart(productId) {
+    addToCart(productId);
+    removeFromWishlist(productId);
+    closeModal();
+}
+
+// Clear cart
+function clearCart() {
+    cart = [];
+    localStorage.setItem('rentique_cart', JSON.stringify(cart));
+    updateCounts();
+    closeModal();
+    showNotification('Cart cleared');
+}
+
+// Clear wishlist
+function clearWishlist() {
+    wishlist = [];
+    localStorage.setItem('rentique_wishlist', JSON.stringify(wishlist));
+    updateCounts();
+    closeModal();
+    showNotification('Wishlist cleared');
+}
+
+// Order entire cart
+function orderCart() {
+    const message = `Hi! I'm interested in ordering the following items:\n\n${cart.map(item => `- ${item.name} ($${item.price.toFixed(2)})`).join('\n')}\n\nTotal: $${cart.reduce((sum, item) => sum + item.price, 0).toFixed(2)}`;
+    window.open(`${FACEBOOK_PAGE_URL}`, '_blank');
+    showNotification('Redirecting to Facebook to complete your order');
 }
 
 // Smooth scrolling for anchor links
