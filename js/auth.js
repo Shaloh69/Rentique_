@@ -221,12 +221,55 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// Ensure products are loaded
+async function ensureProductsLoaded() {
+    // If allProducts is already populated, return
+    if (allProducts && allProducts.length > 0) {
+        return;
+    }
+
+    // Load products from JSON
+    try {
+        const response = await fetch('data/products.json');
+        const data = await response.json();
+        allProducts = data.products;
+
+        // Load deleted products list
+        const deletedProducts = JSON.parse(localStorage.getItem('rentique_deleted_products')) || [];
+
+        // Filter out deleted products
+        allProducts = allProducts.filter(p => !deletedProducts.includes(p.id));
+
+        // Load edited products from localStorage
+        const editedProducts = JSON.parse(localStorage.getItem('rentique_edited_products')) || [];
+
+        // Replace original products with edited versions
+        editedProducts.forEach(editedProduct => {
+            const index = allProducts.findIndex(p => p.id === editedProduct.id);
+            if (index !== -1) {
+                allProducts[index] = editedProduct;
+            }
+        });
+
+        // Load custom products from localStorage (added by admin)
+        const customProducts = JSON.parse(localStorage.getItem('rentique_custom_products')) || [];
+
+        // Merge custom products with JSON products
+        allProducts = [...allProducts, ...customProducts];
+    } catch (error) {
+        console.error('Error loading products:', error);
+    }
+}
+
 // Show admin panel
-function showAdminPanel() {
+async function showAdminPanel() {
     if (!isAdmin()) {
         showNotification('Access denied. Admin only.');
         return;
     }
+
+    // Ensure products are loaded before showing panel
+    await ensureProductsLoaded();
 
     const modal = document.createElement('div');
     modal.className = 'product-modal';
@@ -386,9 +429,12 @@ function loadAdminProducts() {
         return;
     }
 
+    // Add timestamp to prevent image caching
+    const timestamp = new Date().getTime();
+
     productsList.innerHTML = allProducts.map(product => `
-        <div class="admin-product-item">
-            <img src="${product.image}" alt="${product.name}" onerror="this.src='images/logo.png'">
+        <div class="admin-product-item" data-product-id="${product.id}">
+            <img src="${product.image}?t=${timestamp}" alt="${product.name}" onerror="this.src='images/logo.png'">
             <div class="admin-product-details">
                 <h4>${product.name}</h4>
                 <p>${product.category} - $${product.price.toFixed(2)}</p>
