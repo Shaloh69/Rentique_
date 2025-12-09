@@ -113,10 +113,13 @@ function displayProducts(products) {
         return;
     }
 
+    // Add timestamp to prevent image caching
+    const timestamp = new Date().getTime();
+
     productGrid.innerHTML = products.map(product => `
         <div class="product-card" data-id="${product.id}">
             <div class="card-media">
-                <img src="${product.image}" alt="${product.name}" onerror="this.src='images/logo.png'">
+                <img src="${product.image}?t=${timestamp}" alt="${product.name}" onerror="this.src='images/logo.png'">
             </div>
             <div class="card-body">
                 <div class="product-title">${product.name}</div>
@@ -207,6 +210,9 @@ function showProductModal(productId) {
 
     if (!product) return;
 
+    // Add timestamp to prevent image caching
+    const timestamp = new Date().getTime();
+
     const modal = document.createElement('div');
     modal.className = 'product-modal';
     modal.innerHTML = `
@@ -215,7 +221,7 @@ function showProductModal(productId) {
             <button class="modal-close" onclick="closeModal()">&times;</button>
             <div class="modal-grid">
                 <div class="modal-image">
-                    <img src="${product.image}" alt="${product.name}" onerror="this.src='images/logo.png'">
+                    <img src="${product.image}?t=${timestamp}" alt="${product.name}" onerror="this.src='images/logo.png'">
                 </div>
                 <div class="modal-details">
                     <h2 class="modal-title">${product.name}</h2>
@@ -453,6 +459,7 @@ function showCartModal() {
     }
 
     const total = cart.reduce((sum, item) => sum + item.price, 0);
+    const timestamp = new Date().getTime();
 
     const modal = document.createElement('div');
     modal.className = 'product-modal';
@@ -465,7 +472,7 @@ function showCartModal() {
                 <div class="cart-items">
                     ${cart.map(item => `
                         <div class="cart-item">
-                            <img src="${item.image}" alt="${item.name}">
+                            <img src="${item.image}?t=${timestamp}" alt="${item.name}">
                             <div class="cart-item-details">
                                 <div class="cart-item-name">${item.name}</div>
                                 <div class="cart-item-price">$${item.price.toFixed(2)}</div>
@@ -497,6 +504,8 @@ function showWishlistModal() {
         return;
     }
 
+    const timestamp = new Date().getTime();
+
     const modal = document.createElement('div');
     modal.className = 'product-modal';
     modal.innerHTML = `
@@ -508,7 +517,7 @@ function showWishlistModal() {
                 <div class="cart-items">
                     ${wishlist.map(item => `
                         <div class="cart-item">
-                            <img src="${item.image}" alt="${item.name}">
+                            <img src="${item.image}?t=${timestamp}" alt="${item.name}">
                             <div class="cart-item-details">
                                 <div class="cart-item-name">${item.name}</div>
                                 <div class="cart-item-price">$${item.price.toFixed(2)}</div>
