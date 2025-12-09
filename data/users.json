@@ -1,0 +1,18 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Admin",
+      "email": "admin@rentique.com",
+      "password": "admin123",
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "name": "Demo User",
+      "email": "user@rentique.com",
+      "password": "user123",
+      "role": "user"
+    }
+  ]
+}

@@ -70,6 +70,13 @@ async function loadProducts() {
         const response = await fetch('data/products.json');
         const data = await response.json();
         allProducts = data.products;
+
+        // Load custom products from localStorage (added by admin)
+        const customProducts = JSON.parse(localStorage.getItem('rentique_custom_products')) || [];
+
+        // Merge custom products with JSON products
+        allProducts = [...allProducts, ...customProducts];
+
         filteredProducts = [...allProducts];
         displayProducts(filteredProducts);
     } catch (error) {

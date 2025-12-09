@@ -9,7 +9,10 @@ A beautiful, responsive promotional website for ordering dresses and formal wear
 - **Category Filtering**: Filter by Women, Men, and Kiddies categories
 - **Search Functionality**: Real-time search across product names and descriptions
 - **Product Details Modal**: Click any product to view detailed information
+- **Shopping Cart & Wishlist**: Save items for later or add to cart
 - **Facebook Integration**: "Order Now" buttons redirect to your Facebook page
+- **User Authentication**: Email-based login/logout system
+- **Admin Panel**: Admin users can add and manage products
 - **Responsive Design**: Works perfectly on desktop, tablet, and mobile devices
 
 ### 🎨 Design Elements
@@ -28,9 +31,11 @@ Rentique_/
 ├── products.html           # Products catalog page
 ├── style.css              # All styling
 ├── js/
+│   ├── auth.js            # Authentication system
 │   └── main.js            # All JavaScript functionality
 ├── data/
-│   └── products.json      # Product data (20 products)
+│   ├── products.json      # Product data (20 products)
+│   └── users.json         # User accounts (admin & demo user)
 ├── images/
 │   ├── logo.png           # Rentique logo
 │   ├── pngegg.png         # Search icon
@@ -47,7 +52,23 @@ Rentique_/
 
 ## Setup Instructions
 
-### 1. Configure Facebook Page URL
+### 1. Login Credentials
+
+The website includes a built-in authentication system with demo accounts:
+
+**Admin Account:**
+- Email: `admin@rentique.com`
+- Password: `admin123`
+- Can add/delete products via Admin Panel
+
+**Demo User Account:**
+- Email: `user@rentique.com`
+- Password: `user123`
+- Can browse and order products
+
+You can modify these credentials in `data/users.json`.
+
+### 2. Configure Facebook Page URL
 
 Open `js/main.js` and update line 4 with your Facebook page URL:
 
@@ -57,7 +78,7 @@ const FACEBOOK_PAGE_URL = 'https://www.facebook.com/YourRentiquePage';
 
 Replace `YourRentiquePage` with your actual Facebook page URL.
 
-### 2. Add Your Product Images
+### 3. Add Your Product Images
 
 The website includes SVG placeholder images. To add your actual dress photos:
 
@@ -66,7 +87,7 @@ The website includes SVG placeholder images. To add your actual dress photos:
 3. Recommended image size: 400x500 pixels (4:5 aspect ratio)
 4. Supported formats: JPG, PNG, SVG
 
-### 3. Customize Product Data
+### 4. Customize Product Data
 
 Edit `data/products.json` to update:
 - Product names
@@ -88,14 +109,14 @@ Example product entry:
 }
 ```
 
-### 4. Update Homepage Images
+### 5. Update Homepage Images
 
 Replace placeholder images in the home page:
 - Hero section dress image: Update the placeholder in `index.html` line 53-56
 - Mission section photo: Add `images/mission-photo.jpg`
 - Why Choose Us images: Add images and update placeholders on lines 96-98
 
-### 5. Deploy
+### 6. Deploy
 
 This is a static website with no server requirements. Deploy options:
 
@@ -136,6 +157,60 @@ Type in the search bar to search across:
 - Category names
 
 Results update in real-time as you type.
+
+### User Authentication
+
+The website includes a complete authentication system:
+
+**Login:**
+1. Click the login icon in the navigation bar
+2. Enter your email and password
+3. System validates against `data/users.json`
+4. Session stored in localStorage
+
+**Logout:**
+1. Click your profile icon
+2. Select "Logout" from dropdown
+3. Session cleared, redirected to home page
+
+**Session Persistence:**
+- Login state saved in localStorage
+- Stays logged in across page refreshes
+- Logout required to switch accounts
+
+### Admin Panel (Admin Only)
+
+Admin users have access to a powerful product management panel:
+
+**Accessing Admin Panel:**
+1. Login with admin credentials
+2. Click your profile icon
+3. Select "Admin Panel"
+
+**Adding Products:**
+1. Go to "Add Product" tab
+2. Fill in product details:
+   - Name
+   - Category (Women/Men/Kiddies)
+   - Price
+   - Image URL
+   - Description
+   - Featured status
+3. Click "Add Product"
+4. Product saved to localStorage
+5. Appears immediately on products page
+
+**Managing Products:**
+1. Go to "Manage Products" tab
+2. View all custom products
+3. Delete products with "Delete" button
+4. Changes reflect immediately
+
+**How Custom Products Work:**
+- Stored in localStorage as `rentique_custom_products`
+- Merged with JSON products on page load
+- Persist across sessions
+- Can be exported/imported for backup
 
 ## Customization Guide
 
