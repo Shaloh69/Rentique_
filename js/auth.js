@@ -377,25 +377,28 @@ function handleAddProduct(event) {
 
 // Load admin products list
 function loadAdminProducts() {
-    const customProducts = JSON.parse(localStorage.getItem('rentique_custom_products')) || [];
     const productsList = document.getElementById('admin-products-list');
 
     if (!productsList) return;
 
-    if (customProducts.length === 0) {
-        productsList.innerHTML = '<p class="no-products-msg">No custom products added yet.</p>';
+    if (allProducts.length === 0) {
+        productsList.innerHTML = '<p class="no-products-msg">No products available.</p>';
         return;
     }
 
-    productsList.innerHTML = customProducts.map(product => `
+    productsList.innerHTML = allProducts.map(product => `
         <div class="admin-product-item">
             <img src="${product.image}" alt="${product.name}" onerror="this.src='images/logo.png'">
             <div class="admin-product-details">
                 <h4>${product.name}</h4>
                 <p>${product.category} - $${product.price.toFixed(2)}</p>
                 <small>${product.description}</small>
+                ${product.custom ? '<span class="custom-badge">Custom</span>' : '<span class="original-badge">Original</span>'}
             </div>
-            <button class="btn-remove" onclick="deleteProduct(${product.id})">Delete</button>
+            <div class="admin-product-actions">
+                <button class="btn-edit" onclick="editProduct(${product.id})">Edit</button>
+                <button class="btn-remove" onclick="deleteProduct(${product.id})">Delete</button>
+            </div>
         </div>
     `).join('');
 }
@@ -406,14 +409,182 @@ function deleteProduct(productId) {
         return;
     }
 
-    let customProducts = JSON.parse(localStorage.getItem('rentique_custom_products')) || [];
-    customProducts = customProducts.filter(p => p.id !== productId);
-    localStorage.setItem('rentique_custom_products', JSON.stringify(customProducts));
+    const product = allProducts.find(p => p.id === productId);
+
+    if (product.custom) {
+        // Delete custom product from localStorage
+        let customProducts = JSON.parse(localStorage.getItem('rentique_custom_products')) || [];
+        customProducts = customProducts.filter(p => p.id !== productId);
+        localStorage.setItem('rentique_custom_products', JSON.stringify(customProducts));
+    } else {
+        // Mark original JSON product as deleted
+        let deletedProducts = JSON.parse(localStorage.getItem('rentique_deleted_products')) || [];
+        if (!deletedProducts.includes(productId)) {
+            deletedProducts.push(productId);
+            localStorage.setItem('rentique_deleted_products', JSON.stringify(deletedProducts));
+        }
+    }
 
     // Remove from allProducts
     allProducts = allProducts.filter(p => p.id !== productId);
 
     showNotification('Product deleted successfully');
+
+    // Reload admin products list
+    loadAdminProducts();
+
+    // Reload products if on products page
+    if (document.querySelector('.product-grid')) {
+        loadProducts();
+    }
+}
+
+// Edit product
+function editProduct(productId) {
+    const product = allProducts.find(p => p.id === productId);
+
+    if (!product) {
+        showNotification('Product not found');
+        return;
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'product-modal';
+    modal.id = 'edit-product-modal';
+    modal.innerHTML = `
+        <div class="modal-overlay" onclick="closeEditModal()"></div>
+        <div class="modal-content admin-panel-content">
+            <button class="modal-close" onclick="closeEditModal()">&times;</button>
+            <div class="admin-panel">
+                <h2 class="modal-title">Edit Product</h2>
+                <form class="admin-form" onsubmit="handleEditProduct(event, ${productId})">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-product-name">Product Name *</label>
+                            <input type="text" id="edit-product-name" class="form-input" value="${product.name}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-product-category">Category *</label>
+                            <select id="edit-product-category" class="form-input" required>
+                                <option value="women" ${product.category === 'women' ? 'selected' : ''}>Women</option>
+                                <option value="men" ${product.category === 'men' ? 'selected' : ''}>Men</option>
+                                <option value="kiddies" ${product.category === 'kiddies' ? 'selected' : ''}>Kiddies</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-product-price">Price ($) *</label>
+                            <input type="number" id="edit-product-price" class="form-input" step="0.01" min="0" value="${product.price}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-product-image">Image URL *</label>
+                            <input type="text" id="edit-product-image" class="form-input" value="${product.image}" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-product-description">Description *</label>
+                        <textarea id="edit-product-description" class="form-input" rows="3" required>${product.description}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="edit-product-featured" ${product.featured ? 'checked' : ''}> Featured Product
+                        </label>
+                    </div>
+                    <button type="submit" class="btn-order-large">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+// Close edit modal
+function closeEditModal() {
+    const modal = document.getElementById('edit-product-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.remove();
+            document.body.style.overflow = '';
+        }, 300);
+    }
+}
+
+// Handle edit product
+function handleEditProduct(event, productId) {
+    event.preventDefault();
+
+    const name = document.getElementById('edit-product-name').value;
+    const category = document.getElementById('edit-product-category').value;
+    const price = parseFloat(document.getElementById('edit-product-price').value);
+    const image = document.getElementById('edit-product-image').value;
+    const description = document.getElementById('edit-product-description').value;
+    const featured = document.getElementById('edit-product-featured').checked;
+
+    const product = allProducts.find(p => p.id === productId);
+
+    if (product.custom) {
+        // Update custom product in localStorage
+        let customProducts = JSON.parse(localStorage.getItem('rentique_custom_products')) || [];
+        const index = customProducts.findIndex(p => p.id === productId);
+
+        if (index !== -1) {
+            customProducts[index] = {
+                ...customProducts[index],
+                name,
+                category,
+                price,
+                image,
+                description,
+                featured
+            };
+            localStorage.setItem('rentique_custom_products', JSON.stringify(customProducts));
+        }
+    } else {
+        // For original JSON products, create an edited version in localStorage
+        let editedProducts = JSON.parse(localStorage.getItem('rentique_edited_products')) || [];
+        const existingIndex = editedProducts.findIndex(p => p.id === productId);
+
+        const editedProduct = {
+            id: productId,
+            name,
+            category,
+            price,
+            image,
+            description,
+            featured,
+            custom: true // Mark as custom since it's now modified
+        };
+
+        if (existingIndex !== -1) {
+            editedProducts[existingIndex] = editedProduct;
+        } else {
+            editedProducts.push(editedProduct);
+        }
+
+        localStorage.setItem('rentique_edited_products', JSON.stringify(editedProducts));
+    }
+
+    // Update allProducts array
+    const productIndex = allProducts.findIndex(p => p.id === productId);
+    if (productIndex !== -1) {
+        allProducts[productIndex] = {
+            ...allProducts[productIndex],
+            name,
+            category,
+            price,
+            image,
+            description,
+            featured
+        };
+    }
+
+    showNotification(`Product "${name}" updated successfully!`);
+    closeEditModal();
 
     // Reload admin products list
     loadAdminProducts();

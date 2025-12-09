@@ -71,6 +71,23 @@ async function loadProducts() {
         const data = await response.json();
         allProducts = data.products;
 
+        // Load deleted products list
+        const deletedProducts = JSON.parse(localStorage.getItem('rentique_deleted_products')) || [];
+
+        // Filter out deleted products
+        allProducts = allProducts.filter(p => !deletedProducts.includes(p.id));
+
+        // Load edited products from localStorage
+        const editedProducts = JSON.parse(localStorage.getItem('rentique_edited_products')) || [];
+
+        // Replace original products with edited versions
+        editedProducts.forEach(editedProduct => {
+            const index = allProducts.findIndex(p => p.id === editedProduct.id);
+            if (index !== -1) {
+                allProducts[index] = editedProduct;
+            }
+        });
+
         // Load custom products from localStorage (added by admin)
         const customProducts = JSON.parse(localStorage.getItem('rentique_custom_products')) || [];
 

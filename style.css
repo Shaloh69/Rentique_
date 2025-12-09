@@ -1487,6 +1487,52 @@ select.form-input {
   margin-top: 6px;
 }
 
+.custom-badge,
+.original-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 6px;
+  text-transform: uppercase;
+}
+
+.custom-badge {
+  background: #e6c36a;
+  color: #071032;
+}
+
+.original-badge {
+  background: #d0e8ff;
+  color: #0056b3;
+}
+
+.admin-product-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-edit {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-edit:hover {
+  background: var(--accent);
+  color: var(--navy);
+}
+
 .btn-remove {
   background: transparent;
   border: 2px solid #DC143C;
