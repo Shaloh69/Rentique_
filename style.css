@@ -7,9 +7,60 @@
 }
 
 *{box-sizing:border-box}
-body{font-family: 'Georgia', serif;margin:0;color:#222}
 
-.topbar{background:var(--nav-bg);border-bottom:1px solid rgba(0,0,0,0.1);position:sticky;top:0;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+/* Animated Background */
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+body{
+  font-family: 'Georgia', serif;
+  margin:0;
+  color:#222;
+  background: linear-gradient(-45deg, #071032, #0b233a, #1a1a3e, #e6c36a15, #071032);
+  background-size: 400% 400%;
+  animation: gradientAnimation 15s ease infinite;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Animated particles overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(230, 195, 106, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(230, 195, 106, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 40%);
+  animation: particleFloat 20s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translateY(0px);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateY(-20px);
+  }
+}
+
+.topbar{background:rgba(255, 255, 255, 0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.1);position:sticky;top:0;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
 .topbar-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 40px}
 .logo-wrap{display:flex;align-items:center;gap:12px;cursor:pointer}
 .logo-mark{width:45px;height:45px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center}
@@ -39,14 +90,14 @@ body{font-family: 'Georgia', serif;margin:0;color:#222}
 .mobile-menu-btn.active span:nth-child(3){transform:rotate(-45deg) translate(7px,-6px)}
 
 /* Mobile Navigation */
-.mobile-nav{display:none;background:#fff;border-top:1px solid rgba(0,0,0,0.1);max-height:0;overflow:hidden;transition:max-height 0.3s ease}
+.mobile-nav{display:none;background:rgba(255, 255, 255, 0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid rgba(0,0,0,0.1);max-height:0;overflow:hidden;transition:max-height 0.3s ease}
 .mobile-nav.active{max-height:300px;border-bottom:1px solid rgba(0,0,0,0.1)}
 .mobile-nav ul{list-style:none;margin:0;padding:0}
 .mobile-nav li{font-family:'Inter',sans-serif;color:#333;font-size:16px;font-weight:500;cursor:pointer;padding:16px 40px;border-bottom:1px solid rgba(0,0,0,0.05);transition:all 0.2s ease}
 .mobile-nav li:hover{background:rgba(230,195,106,0.1);color:#071032;padding-left:50px}
 .mobile-nav li.active{color:#e6c36a;font-weight:600;background:rgba(230,195,106,0.05)}
 
-.hero{background:var(--navy);color:#fff;padding:80px 0 100px 0}
+.hero{background:rgba(7, 16, 50, 0.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;padding:80px 0 100px 0;position:relative;z-index:1}
 .hero-inner{max-width:1400px;margin:0 auto;display:flex;gap:80px;align-items:center;padding:0 80px}
 .hero-left{flex:1;max-width:800px}
 .hero-right{flex:0 0 500px;display:flex;align-items:center;justify-content:center}
@@ -67,7 +118,7 @@ body{font-family: 'Georgia', serif;margin:0;color:#222}
 .dress-placeholder{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
 .placeholder-box{width:100%;max-width:420px;height: 650px;;aspect-ratio:3/4;background:#fff;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#999;font-weight:600;font-size:18px;box-shadow:0 10px 40px rgba(0,0,0,0.15)}
 
-.mission{background:#e3e3e3;padding: 50px 20px 100px 20px}
+.mission{background:rgba(227, 227, 227, 0.65);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding: 50px 20px 100px 20px;position:relative;z-index:1}
 .mission-inner{max-width:1400px;margin:0 auto;display:flex;gap:80px;align-items:center;position:relative;padding:0 40px}
 
 /* section title centered above the two columns */
@@ -203,9 +254,12 @@ body{font-family: 'Georgia', serif;margin:0;color:#222}
 
 .products-hero{
   background:rgba(8,16,40,0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: #111;
   padding: 22px 0 6px;
   position: relative;
+  z-index: 1;
 }
 .products-hero-inner{
   max-width:1200px;
@@ -249,9 +303,13 @@ body{font-family: 'Georgia', serif;margin:0;color:#222}
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 32px;
+  position: relative;
+  z-index: 1;
 }
 .product-card {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
@@ -259,6 +317,7 @@ body{font-family: 'Georgia', serif;margin:0;color:#222}
   flex-direction: column;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 .product-card:hover {
   transform: translateY(-6px);
@@ -403,19 +462,25 @@ body{font-family: 'Georgia', serif;margin:0;color:#222}
 
 /* Footer top gold section */
 .footer-top {
-  background: #d9d9d9;
+  background: rgba(217, 217, 217, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   height: 30px;
-  
+
   position: relative;
   z-index: 5;
 }
 
 /* Footer styles */
 .footer {
-  background: #d9d9d9;
+  background: rgba(217, 217, 217, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   padding: 70px 0 150px 0;
   font-family: 'Outfit', sans-serif;
   text-align: left;
+  position: relative;
+  z-index: 1;
 }
 .footer-inner {
   max-width: 1600px;
@@ -587,7 +652,9 @@ body{font-family: 'Georgia', serif;margin:0;color:#222}
 
 .modal-content {
   position: relative;
-  background: white;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 16px;
   max-width: 900px;
   width: 90%;
@@ -596,6 +663,7 @@ body{font-family: 'Georgia', serif;margin:0;color:#222}
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   transform: scale(0.9);
   transition: transform 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .product-modal.active .modal-content {
@@ -1319,6 +1387,9 @@ input:focus {
   font-family: 'Inter', sans-serif;
   font-size: 15px;
   transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .form-input:focus {

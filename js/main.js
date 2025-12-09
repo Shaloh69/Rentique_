@@ -588,3 +588,74 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         }
     });
 });
+
+// Load random featured products for home page
+async function loadFeaturedProductsForHome() {
+    try {
+        const response = await fetch('data/products.json');
+        const data = await response.json();
+        let products = data.products;
+
+        // Load deleted products list
+        const deletedProducts = JSON.parse(localStorage.getItem('rentique_deleted_products')) || [];
+
+        // Filter out deleted products
+        products = products.filter(p => !deletedProducts.includes(p.id));
+
+        // Load edited products from localStorage
+        const editedProducts = JSON.parse(localStorage.getItem('rentique_edited_products')) || [];
+
+        // Replace original products with edited versions
+        editedProducts.forEach(editedProduct => {
+            const index = products.findIndex(p => p.id === editedProduct.id);
+            if (index !== -1) {
+                products[index] = editedProduct;
+            }
+        });
+
+        // Load custom products from localStorage (added by admin)
+        const customProducts = JSON.parse(localStorage.getItem('rentique_custom_products')) || [];
+
+        // Merge custom products with JSON products
+        products = [...products, ...customProducts];
+
+        // Filter for featured products
+        const featuredProducts = products.filter(p => p.featured);
+
+        // If no featured products, use all products
+        const productsToUse = featuredProducts.length > 0 ? featuredProducts : products;
+
+        if (productsToUse.length === 0) return;
+
+        // Select random products for hero and mission sections
+        const randomProduct1 = productsToUse[Math.floor(Math.random() * productsToUse.length)];
+        const randomProduct2 = productsToUse[Math.floor(Math.random() * productsToUse.length)];
+
+        // Update hero image
+        const heroImage = document.getElementById('hero-featured-image');
+        if (heroImage) {
+            heroImage.src = randomProduct1.image;
+            heroImage.alt = randomProduct1.name;
+            heroImage.onerror = function() {
+                this.src = 'images/logo.png';
+            };
+        }
+
+        // Update mission image
+        const missionImage = document.getElementById('mission-featured-image');
+        if (missionImage) {
+            missionImage.src = randomProduct2.image;
+            missionImage.alt = randomProduct2.name;
+            missionImage.onerror = function() {
+                this.src = 'images/logo.png';
+            };
+        }
+    } catch (error) {
+        console.error('Error loading featured products:', error);
+    }
+}
+
+// Load featured products on home page load
+if (window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/')) {
+    loadFeaturedProductsForHome();
+}
