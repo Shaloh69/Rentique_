@@ -5,6 +5,7 @@ const FACEBOOK_PAGE_URL = 'https://www.facebook.com/YourRentiquePage'; // Replac
 let allProducts = [];
 let filteredProducts = [];
 let currentCategory = 'all';
+let currentSubcategory = 'all';
 
 // Cart and Wishlist (stored in localStorage)
 let cart = JSON.parse(localStorage.getItem('rentique_cart')) || [];
@@ -48,7 +49,7 @@ function viewCart() {
         return;
     }
 
-    const cartMessage = cart.map(item => `${item.name} - $${item.price.toFixed(2)}`).join('\n');
+    const cartMessage = cart.map(item => `${item.name} - ₱${item.price.toFixed(2)}`).join('\n');
     const total = cart.reduce((sum, item) => sum + item.price, 0);
 
     showCartModal();
@@ -123,7 +124,7 @@ function displayProducts(products) {
             </div>
             <div class="card-body">
                 <div class="product-title">${product.name}</div>
-                <div class="product-price">$${product.price.toFixed(2)}</div>
+                <div class="product-price">₱${product.price.toFixed(2)}</div>
                 <button class="btn-order" onclick="orderProduct(${product.id})">Order Now</button>
             </div>
         </div>
@@ -143,18 +144,63 @@ function displayProducts(products) {
 // Filter products by category
 function filterByCategory(category) {
     currentCategory = category;
+    currentSubcategory = 'all'; // Reset subcategory when changing main category
 
     // Update active category button
-    document.querySelectorAll('.category-nav li').forEach(li => {
+    document.querySelectorAll('.category-nav-center > ul:first-child li').forEach(li => {
         li.classList.remove('cat-active');
     });
     event.target.classList.add('cat-active');
+
+    // Show/hide subcategory nav for Women
+    const subcategoryNav = document.getElementById('subcategory-nav');
+    if (subcategoryNav) {
+        if (category === 'women') {
+            subcategoryNav.style.display = 'flex';
+            // Reset subcategory active state
+            document.querySelectorAll('.subcategory-nav li').forEach(li => {
+                li.classList.remove('subcat-active');
+            });
+            document.querySelector('.subcategory-nav li[data-subcategory="all"]').classList.add('subcat-active');
+        } else {
+            subcategoryNav.style.display = 'none';
+        }
+    }
 
     // Filter products
     if (category === 'all') {
         filteredProducts = [...allProducts];
     } else {
         filteredProducts = allProducts.filter(p => p.category === category.toLowerCase());
+    }
+
+    // Apply search filter if active
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput && searchInput.value.trim()) {
+        searchProducts(searchInput.value);
+    } else {
+        displayProducts(filteredProducts);
+    }
+}
+
+// Filter products by subcategory
+function filterBySubcategory(subcategory) {
+    currentSubcategory = subcategory;
+
+    // Update active subcategory button
+    document.querySelectorAll('.subcategory-nav li').forEach(li => {
+        li.classList.remove('subcat-active');
+    });
+    event.target.classList.add('subcat-active');
+
+    // Filter products by category first
+    let categoryFiltered = allProducts.filter(p => p.category === 'women');
+
+    // Then filter by subcategory
+    if (subcategory === 'all') {
+        filteredProducts = categoryFiltered;
+    } else {
+        filteredProducts = categoryFiltered.filter(p => p.subcategory === subcategory);
     }
 
     // Apply search filter if active
@@ -178,7 +224,8 @@ function searchProducts(query) {
     const searchResults = filteredProducts.filter(product =>
         product.name.toLowerCase().includes(searchTerm) ||
         product.description.toLowerCase().includes(searchTerm) ||
-        product.category.toLowerCase().includes(searchTerm)
+        product.category.toLowerCase().includes(searchTerm) ||
+        (product.subcategory && product.subcategory.toLowerCase().includes(searchTerm))
     );
 
     displayProducts(searchResults);
@@ -190,7 +237,7 @@ function orderProduct(productId) {
 
     if (product) {
         // Create a message to send to Facebook
-        const message = `Hi! I'm interested in ordering: ${product.name} ($${product.price.toFixed(2)})`;
+        const message = `Hi! I'm interested in ordering: ${product.name} (₱${product.price.toFixed(2)})`;
 
         // Encode the message for URL
         const encodedMessage = encodeURIComponent(message);
@@ -210,6 +257,25 @@ function showProductModal(productId) {
 
     if (!product) return;
 
+    // Get booked dates from localStorage
+    const bookings = JSON.parse(localStorage.getItem('rentique_bookings')) || {};
+    const productBookings = bookings[productId] || [];
+
+    // Format booked dates for display
+    const bookedDatesDisplay = productBookings.length > 0
+        ? productBookings.map(booking => {
+            const start = new Date(booking.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const end = new Date(booking.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            return `${start} - ${end}`;
+          }).join('<br>')
+        : 'None - Available for all dates!';
+
+    const availabilityStatus = product.available && productBookings.length === 0
+        ? '<span style="color: #28a745;">✓ Available</span>'
+        : productBookings.length > 0
+        ? '<span style="color: #ffc107;">⚠ Partially Booked</span>'
+        : '<span style="color: #dc3545;">✗ Unavailable</span>';
+
     // Add timestamp to prevent image caching
     const timestamp = new Date().getTime();
 
@@ -225,9 +291,33 @@ function showProductModal(productId) {
                 </div>
                 <div class="modal-details">
                     <h2 class="modal-title">${product.name}</h2>
-                    <div class="modal-category">${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</div>
-                    <div class="modal-price">$${product.price.toFixed(2)}</div>
+                    <div class="modal-category">${product.category.charAt(0).toUpperCase() + product.category.slice(1)}${product.subcategory ? ' - ' + product.subcategory.charAt(0).toUpperCase() + product.subcategory.slice(1) : ''}</div>
+                    <div class="modal-price">₱${product.price.toFixed(2)}</div>
+                    <div class="modal-availability">
+                        <strong>Availability:</strong> ${availabilityStatus}
+                    </div>
                     <p class="modal-description">${product.description}</p>
+
+                    <div class="availability-section">
+                        <h3>Rental Availability</h3>
+                        <div class="booked-dates">
+                            <strong>Currently Booked:</strong><br>
+                            <small>${bookedDatesDisplay}</small>
+                        </div>
+                        <div class="date-picker-section">
+                            <label><strong>Select Rental Dates:</strong></label>
+                            <div class="date-inputs">
+                                <input type="date" id="rental-start-${product.id}" class="date-input" min="${new Date().toISOString().split('T')[0]}">
+                                <span>to</span>
+                                <input type="date" id="rental-end-${product.id}" class="date-input" min="${new Date().toISOString().split('T')[0]}">
+                            </div>
+                            <button class="btn-check-availability" onclick="checkAvailability(${product.id})">
+                                Check Availability
+                            </button>
+                            <div id="availability-result-${product.id}" class="availability-result"></div>
+                        </div>
+                    </div>
+
                     <div class="modal-actions">
                         <button class="btn-add-cart" onclick="addToCart(${product.id}); closeModal();">
                             Add to Cart
@@ -236,11 +326,14 @@ function showProductModal(productId) {
                             Add to Wishlist
                         </button>
                     </div>
-                    <button class="btn-order-large" onclick="orderProduct(${product.id})">
+                    <button class="btn-order-large" onclick="openContactForm(${product.id})">
+                        Contact Us to Rent
+                    </button>
+                    <button class="btn-order-large" onclick="orderProduct(${product.id})" style="margin-top: 10px; background: #3b5998;">
                         Order on Facebook
                     </button>
                     <div class="modal-note">
-                        <small>Add to cart or order directly on Facebook</small>
+                        <small>Add to cart or contact us directly to arrange rental</small>
                     </div>
                 </div>
             </div>
@@ -301,11 +394,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Setup category filters
-    const categoryItems = document.querySelectorAll('.category-nav li');
+    const categoryItems = document.querySelectorAll('.category-nav-center > ul:first-child li');
     categoryItems.forEach((item, index) => {
         item.addEventListener('click', (e) => {
             const categories = ['all', 'women', 'men', 'kiddies'];
             filterByCategory(categories[index]);
+        });
+    });
+
+    // Setup subcategory filters
+    const subcategoryItems = document.querySelectorAll('.subcategory-nav li');
+    subcategoryItems.forEach((item) => {
+        item.addEventListener('click', (e) => {
+            const subcategory = item.getAttribute('data-subcategory');
+            filterBySubcategory(subcategory);
         });
     });
 
@@ -475,14 +577,14 @@ function showCartModal() {
                             <img src="${item.image}?t=${timestamp}" alt="${item.name}">
                             <div class="cart-item-details">
                                 <div class="cart-item-name">${item.name}</div>
-                                <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                                <div class="cart-item-price">₱${item.price.toFixed(2)}</div>
                             </div>
                             <button class="remove-btn" onclick="removeFromCart(${item.id})">Remove</button>
                         </div>
                     `).join('')}
                 </div>
                 <div class="cart-total">
-                    <strong>Total: $${total.toFixed(2)}</strong>
+                    <strong>Total: ₱${total.toFixed(2)}</strong>
                 </div>
                 <button class="btn-order-large" onclick="orderCart()">
                     Order via Facebook
@@ -520,7 +622,7 @@ function showWishlistModal() {
                             <img src="${item.image}?t=${timestamp}" alt="${item.name}">
                             <div class="cart-item-details">
                                 <div class="cart-item-name">${item.name}</div>
-                                <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                                <div class="cart-item-price">₱${item.price.toFixed(2)}</div>
                             </div>
                             <button class="add-to-cart-btn" onclick="moveToCart(${item.id})">Add to Cart</button>
                             <button class="remove-btn" onclick="removeFromWishlist(${item.id})">Remove</button>
@@ -535,6 +637,147 @@ function showWishlistModal() {
     document.body.appendChild(modal);
     document.body.style.overflow = 'hidden';
     setTimeout(() => modal.classList.add('active'), 10);
+}
+
+// Check availability for selected dates
+function checkAvailability(productId) {
+    const startDateInput = document.getElementById(`rental-start-${productId}`);
+    const endDateInput = document.getElementById(`rental-end-${productId}`);
+    const resultDiv = document.getElementById(`availability-result-${productId}`);
+
+    if (!startDateInput || !endDateInput) return;
+
+    const startDate = new Date(startDateInput.value);
+    const endDate = new Date(endDateInput.value);
+
+    // Validation
+    if (!startDateInput.value || !endDateInput.value) {
+        resultDiv.innerHTML = '<p style="color: #dc3545;">Please select both start and end dates.</p>';
+        return;
+    }
+
+    if (endDate <= startDate) {
+        resultDiv.innerHTML = '<p style="color: #dc3545;">End date must be after start date.</p>';
+        return;
+    }
+
+    // Check against existing bookings
+    const bookings = JSON.parse(localStorage.getItem('rentique_bookings')) || {};
+    const productBookings = bookings[productId] || [];
+
+    let isAvailable = true;
+    for (const booking of productBookings) {
+        const bookedStart = new Date(booking.startDate);
+        const bookedEnd = new Date(booking.endDate);
+
+        // Check for overlap
+        if ((startDate <= bookedEnd && endDate >= bookedStart)) {
+            isAvailable = false;
+            break;
+        }
+    }
+
+    if (isAvailable) {
+        resultDiv.innerHTML = '<p style="color: #28a745;"><strong>✓ Available!</strong> Click "Contact Us to Rent" to proceed.</p>';
+    } else {
+        resultDiv.innerHTML = '<p style="color: #dc3545;"><strong>✗ Not Available</strong> - These dates conflict with existing bookings.</p>';
+    }
+}
+
+// Open contact form for rental inquiry
+function openContactForm(productId) {
+    const product = allProducts.find(p => p.id === productId);
+    if (!product) return;
+
+    // Get selected dates
+    const startDateInput = document.getElementById(`rental-start-${productId}`);
+    const endDateInput = document.getElementById(`rental-end-${productId}`);
+
+    const startDate = startDateInput && startDateInput.value ? new Date(startDateInput.value).toLocaleDateString() : 'Not selected';
+    const endDate = endDateInput && endDateInput.value ? new Date(endDateInput.value).toLocaleDateString() : 'Not selected';
+
+    // Close current modal
+    closeModal();
+
+    // Open contact form modal
+    const modal = document.createElement('div');
+    modal.className = 'product-modal contact-form-modal';
+    modal.innerHTML = `
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-content" style="max-width: 600px;">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div class="contact-form-container">
+                <h2>Rental Inquiry for ${product.name}</h2>
+                <p><strong>Price:</strong> ₱${product.price.toFixed(2)}</p>
+                <p><strong>Rental Period:</strong> ${startDate} to ${endDate}</p>
+
+                <form id="rental-contact-form" onsubmit="submitRentalInquiry(event, ${productId})">
+                    <div class="form-group">
+                        <label>Your Name *</label>
+                        <input type="text" id="contact-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address *</label>
+                        <input type="email" id="contact-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="contact-phone">
+                    </div>
+                    <div class="form-group">
+                        <label>Message / Special Requests</label>
+                        <textarea id="contact-message" rows="4" placeholder="Please let us know any special requests or questions..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-order-large">Submit Inquiry</button>
+                    <p class="form-note"><small>We'll contact you within 24 hours via email or phone.</small></p>
+                </form>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+// Submit rental inquiry
+function submitRentalInquiry(event, productId) {
+    event.preventDefault();
+
+    const product = allProducts.find(p => p.id === productId);
+    const name = document.getElementById('contact-name').value;
+    const email = document.getElementById('contact-email').value;
+    const phone = document.getElementById('contact-phone').value;
+    const message = document.getElementById('contact-message').value;
+
+    // Get rental dates
+    const startDateInput = document.getElementById(`rental-start-${productId}`);
+    const endDateInput = document.getElementById(`rental-end-${productId}`);
+    const startDate = startDateInput ? startDateInput.value : '';
+    const endDate = endDateInput ? endDateInput.value : '';
+
+    // Save inquiry to localStorage
+    const inquiries = JSON.parse(localStorage.getItem('rentique_inquiries')) || [];
+    inquiries.push({
+        id: Date.now(),
+        productId: productId,
+        productName: product.name,
+        name: name,
+        email: email,
+        phone: phone,
+        message: message,
+        startDate: startDate,
+        endDate: endDate,
+        timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('rentique_inquiries', JSON.stringify(inquiries));
+
+    // Show success message
+    closeModal();
+    showNotification(`Thank you, ${name}! Your rental inquiry for ${product.name} has been submitted. We'll contact you soon at ${email}.`);
+
+    // In a real application, you would send this to a backend or email service
+    // For now, we're just storing it in localStorage for demo purposes
 }
 
 // Remove from cart
@@ -582,7 +825,7 @@ function clearWishlist() {
 
 // Order entire cart
 function orderCart() {
-    const message = `Hi! I'm interested in ordering the following items:\n\n${cart.map(item => `- ${item.name} ($${item.price.toFixed(2)})`).join('\n')}\n\nTotal: $${cart.reduce((sum, item) => sum + item.price, 0).toFixed(2)}`;
+    const message = `Hi! I'm interested in ordering the following items:\n\n${cart.map(item => `- ${item.name} (₱${item.price.toFixed(2)})`).join('\n')}\n\nTotal: ₱${cart.reduce((sum, item) => sum + item.price, 0).toFixed(2)}`;
     window.open(`${FACEBOOK_PAGE_URL}`, '_blank');
     showNotification('Redirecting to Facebook to complete your order');
 }

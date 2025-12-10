@@ -185,7 +185,7 @@ function updateNavigation() {
                         <small>${currentUser.email}</small>
                         ${currentUser.role === 'admin' ? '<span class="admin-badge">Admin</span>' : ''}
                     </div>
-                    ${currentUser.role === 'admin' ? '<button onclick="showAdminPanel()" class="dropdown-item">Admin Panel</button>' : ''}
+                    ${currentUser.role === 'admin' ? '<button onclick="window.location.href=\'admin.html\'" class="dropdown-item">Admin Dashboard</button>' : ''}
                     <button onclick="logout()" class="dropdown-item logout-btn">Logout</button>
                 </div>
             </div>

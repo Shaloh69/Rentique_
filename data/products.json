@@ -4,181 +4,229 @@
       "id": 1,
       "name": "Elegant Evening Gown",
       "category": "women",
-      "price": 299.99,
+      "subcategory": "evening",
+      "price": 16799.44,
       "image": "images/products/dress-1.jpg",
       "description": "Stunning floor-length evening gown with intricate beading and flowing silhouette. Perfect for weddings and formal events.",
-      "featured": true
+      "featured": true,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 2,
       "name": "Floral Summer Dress",
       "category": "women",
-      "price": 89.99,
+      "subcategory": "casual",
+      "price": 5039.44,
       "image": "images/products/dress-2.jpg",
       "description": "Light and breezy floral print dress, perfect for summer occasions and garden parties.",
-      "featured": false
+      "featured": false,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 3,
       "name": "Classic Cocktail Dress",
       "category": "women",
-      "price": 149.99,
+      "subcategory": "cocktail",
+      "price": 8399.44,
       "image": "images/products/dress-3.jpg",
       "description": "Timeless little black dress with modern cut and elegant details. Versatile for any cocktail event.",
-      "featured": true
+      "featured": true,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 4,
       "name": "Boho Maxi Dress",
       "category": "women",
-      "price": 129.99,
+      "subcategory": "casual",
+      "price": 7279.44,
       "image": "images/products/dress-4.jpg",
       "description": "Flowing maxi dress with bohemian patterns and comfortable fit. Perfect for casual elegant events.",
-      "featured": false
+      "featured": false,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 5,
       "name": "Wedding Guest Dress",
       "category": "women",
-      "price": 179.99,
+      "subcategory": "wedding",
+      "price": 10079.44,
       "image": "images/products/dress-5.jpg",
       "description": "Sophisticated midi dress in soft pastels, ideal for wedding guests and celebrations.",
-      "featured": false
+      "featured": false,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 6,
       "name": "Red Carpet Gown",
       "category": "women",
-      "price": 399.99,
+      "subcategory": "evening",
+      "price": 22399.44,
       "image": "images/products/dress-6.jpg",
       "description": "Show-stopping red carpet worthy gown with dramatic train and exquisite detailing.",
-      "featured": true
+      "featured": true,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 7,
       "name": "Lace Party Dress",
       "category": "women",
-      "price": 119.99,
+      "subcategory": "party",
+      "price": 6719.44,
       "image": "images/products/dress-7.jpg",
       "description": "Delicate lace overlay dress with vintage charm, perfect for parties and celebrations.",
-      "featured": false
+      "featured": false,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 8,
       "name": "Satin Slip Dress",
       "category": "women",
-      "price": 99.99,
+      "subcategory": "cocktail",
+      "price": 5599.44,
       "image": "images/products/dress-8.jpg",
       "description": "Luxurious satin slip dress with adjustable straps. Effortlessly elegant and versatile.",
-      "featured": false
+      "featured": false,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 9,
       "name": "Classic Tuxedo",
       "category": "men",
-      "price": 349.99,
+      "price": 19599.44,
       "image": "images/products/men-1.jpg",
       "description": "Tailored tuxedo with satin lapels and perfect fit. Essential for black-tie events.",
-      "featured": true
+      "featured": true,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 10,
       "name": "Navy Blue Suit",
       "category": "men",
-      "price": 279.99,
+      "price": 15679.44,
       "image": "images/products/men-2.jpg",
       "description": "Sharp navy suit with modern cut. Perfect for business and formal occasions.",
-      "featured": false
+      "featured": false,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 11,
       "name": "Charcoal Grey Suit",
       "category": "men",
-      "price": 299.99,
+      "price": 16799.44,
       "image": "images/products/men-3.jpg",
       "description": "Sophisticated charcoal suit with contemporary styling. Versatile for any formal event.",
-      "featured": false
+      "featured": false,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 12,
       "name": "Burgundy Dinner Jacket",
       "category": "men",
-      "price": 189.99,
+      "price": 10639.44,
       "image": "images/products/men-4.jpg",
       "description": "Bold burgundy dinner jacket for those who want to make a statement at evening events.",
-      "featured": true
+      "featured": true,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 13,
       "name": "Linen Summer Suit",
       "category": "men",
-      "price": 229.99,
+      "price": 12879.44,
       "image": "images/products/men-5.jpg",
       "description": "Breathable linen suit in light colors, perfect for summer weddings and outdoor events.",
-      "featured": false
+      "featured": false,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 14,
       "name": "Velvet Blazer",
       "category": "men",
-      "price": 259.99,
+      "price": 14559.44,
       "image": "images/products/men-6.jpg",
       "description": "Luxurious velvet blazer with rich texture. Perfect for upscale evening events.",
-      "featured": false
+      "featured": false,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 15,
       "name": "Princess Ball Gown",
       "category": "kiddies",
-      "price": 79.99,
+      "price": 4479.44,
       "image": "images/products/kids-1.jpg",
       "description": "Adorable princess-style ball gown with tulle skirt. Perfect for flower girls and special occasions.",
-      "featured": true
+      "featured": true,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 16,
       "name": "Little Gentleman Suit",
       "category": "kiddies",
-      "price": 89.99,
+      "price": 5039.44,
       "image": "images/products/kids-2.jpg",
       "description": "Charming mini suit for young boys. Complete with jacket, pants, and bow tie.",
-      "featured": false
+      "featured": false,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 17,
       "name": "Flower Girl Dress",
       "category": "kiddies",
-      "price": 69.99,
+      "price": 3919.44,
       "image": "images/products/kids-3.jpg",
       "description": "Sweet flower girl dress with satin sash and delicate details. Perfect for weddings.",
-      "featured": false
+      "featured": false,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 18,
       "name": "Junior Tuxedo",
       "category": "kiddies",
-      "price": 99.99,
+      "price": 5599.44,
       "image": "images/products/kids-4.jpg",
       "description": "Sharp junior tuxedo for ring bearers and formal events. Comes with all accessories.",
-      "featured": true
+      "featured": true,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 19,
       "name": "Party Dress for Girls",
       "category": "kiddies",
-      "price": 59.99,
+      "price": 3359.44,
       "image": "images/products/kids-5.jpg",
       "description": "Vibrant party dress with sparkly details. Perfect for birthday parties and celebrations.",
-      "featured": false
+      "featured": false,
+      "available": true,
+      "bookedDates": []
     },
     {
       "id": 20,
       "name": "Formal Vest Set",
       "category": "kiddies",
-      "price": 74.99,
+      "price": 4199.44,
       "image": "images/products/kids-6.jpg",
       "description": "Stylish vest set for boys with shirt, vest, and tie. Great for formal occasions.",
-      "featured": false
+      "featured": false,
+      "available": true,
+      "bookedDates": []
     }
   ]
 }
