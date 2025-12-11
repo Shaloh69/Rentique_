@@ -643,12 +643,15 @@ function openContactForm(productId) {
     const product = allProducts.find(p => p.id === productId);
     if (!product) return;
 
-    // Get selected dates
+    // Get selected dates before closing modal
     const startDateInput = document.getElementById(`rental-start-${productId}`);
     const endDateInput = document.getElementById(`rental-end-${productId}`);
 
-    const startDate = startDateInput && startDateInput.value ? new Date(startDateInput.value).toLocaleDateString() : 'Not selected';
-    const endDate = endDateInput && endDateInput.value ? new Date(endDateInput.value).toLocaleDateString() : 'Not selected';
+    const startDateValue = startDateInput && startDateInput.value ? startDateInput.value : '';
+    const endDateValue = endDateInput && endDateInput.value ? endDateInput.value : '';
+
+    const startDateDisplay = startDateValue ? new Date(startDateValue).toLocaleDateString() : 'Not selected';
+    const endDateDisplay = endDateValue ? new Date(endDateValue).toLocaleDateString() : 'Not selected';
 
     // Close current modal
     closeModal();
@@ -663,9 +666,23 @@ function openContactForm(productId) {
             <div class="contact-form-container">
                 <h2>Rental Inquiry for ${product.name}</h2>
                 <p><strong>Price:</strong> ₱${product.price.toFixed(2)}</p>
-                <p><strong>Rental Period:</strong> ${startDate} to ${endDate}</p>
+                <p><strong>Rental Period:</strong> ${startDateDisplay} to ${endDateDisplay}</p>
 
                 <form id="rental-contact-form" onsubmit="submitRentalInquiry(event, ${productId})">
+                    <input type="hidden" id="inquiry-start-date-${productId}" value="${startDateValue}">
+                    <input type="hidden" id="inquiry-end-date-${productId}" value="${endDateValue}">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Rental Start Date *</label>
+                            <input type="date" id="contact-start-date" value="${startDateValue}" min="${new Date().toISOString().split('T')[0]}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Rental End Date *</label>
+                            <input type="date" id="contact-end-date" value="${endDateValue}" min="${new Date().toISOString().split('T')[0]}" required>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label>Your Name *</label>
                         <input type="text" id="contact-name" required>
@@ -704,11 +721,20 @@ function submitRentalInquiry(event, productId) {
     const phone = document.getElementById('contact-phone').value;
     const message = document.getElementById('contact-message').value;
 
-    // Get rental dates
-    const startDateInput = document.getElementById(`rental-start-${productId}`);
-    const endDateInput = document.getElementById(`rental-end-${productId}`);
-    const startDate = startDateInput ? startDateInput.value : '';
-    const endDate = endDateInput ? endDateInput.value : '';
+    // Get rental dates from contact form
+    const startDate = document.getElementById('contact-start-date').value;
+    const endDate = document.getElementById('contact-end-date').value;
+
+    // Validate dates
+    if (!startDate || !endDate) {
+        showNotification('Please select both start and end dates for your rental.');
+        return;
+    }
+
+    if (new Date(endDate) <= new Date(startDate)) {
+        showNotification('End date must be after start date.');
+        return;
+    }
 
     // Save inquiry to localStorage
     const inquiries = JSON.parse(localStorage.getItem('rentique_inquiries')) || [];

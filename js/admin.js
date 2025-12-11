@@ -169,6 +169,17 @@ async function editProduct(productId) {
     const product = allProducts.find(p => p.id === productId);
     if (!product) return;
 
+    // Get existing bookings for this product
+    const bookings = JSON.parse(localStorage.getItem('rentique_bookings')) || {};
+    const productBookings = bookings[productId] || [];
+
+    const bookingsHTML = productBookings.length > 0 ? productBookings.map((booking, index) => `
+        <div class="booking-item" style="padding: 8px; margin-bottom: 8px; background: #f5f5f5; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+            <span>${new Date(booking.startDate).toLocaleDateString()} - ${new Date(booking.endDate).toLocaleDateString()}</span>
+            <button type="button" class="btn-icon" onclick="removeBooking(${productId}, ${index}); event.stopPropagation();" title="Remove" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">🗑️</button>
+        </div>
+    `).join('') : '<p style="color: #666; font-size: 14px;">No unavailable dates set</p>';
+
     const modal = document.createElement('div');
     modal.className = 'product-modal';
     modal.innerHTML = `
@@ -231,7 +242,31 @@ async function editProduct(productId) {
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-primary">Update Product</button>
+                    <div class="form-group" style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                        <h3 style="margin-top: 0;">Unavailable Dates</h3>
+                        <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Mark specific date ranges when this product cannot be rented (e.g., already booked, maintenance, etc.)</p>
+
+                        <div id="bookings-list-${productId}" style="margin-bottom: 15px;">
+                            ${bookingsHTML}
+                        </div>
+
+                        <div style="border-top: 1px solid #ddd; padding-top: 15px;">
+                            <h4 style="margin-top: 0; font-size: 16px;">Add Unavailable Period</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Start Date</label>
+                                    <input type="date" id="booking-start-${productId}" min="${new Date().toISOString().split('T')[0]}">
+                                </div>
+                                <div class="form-group">
+                                    <label>End Date</label>
+                                    <input type="date" id="booking-end-${productId}" min="${new Date().toISOString().split('T')[0]}">
+                                </div>
+                            </div>
+                            <button type="button" class="btn-primary" onclick="addBooking(${productId})" style="background: #28a745; margin-top: 10px;">Add Unavailable Period</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="margin-top: 20px;">Update Product</button>
                 </form>
             </div>
         </div>
@@ -466,6 +501,91 @@ function deleteBooking(productId, bookingIndex) {
         localStorage.setItem('rentique_bookings', JSON.stringify(bookings));
         showNotification('Booking deleted successfully!');
         loadBookings();
+    }
+}
+
+// Add booking (mark dates as unavailable) - from edit product modal
+function addBooking(productId) {
+    const startDateInput = document.getElementById(`booking-start-${productId}`);
+    const endDateInput = document.getElementById(`booking-end-${productId}`);
+
+    if (!startDateInput || !endDateInput) return;
+
+    const startDate = startDateInput.value;
+    const endDate = endDateInput.value;
+
+    // Validation
+    if (!startDate || !endDate) {
+        showNotification('Please select both start and end dates.');
+        return;
+    }
+
+    if (new Date(endDate) <= new Date(startDate)) {
+        showNotification('End date must be after start date.');
+        return;
+    }
+
+    // Add booking to localStorage
+    const bookings = JSON.parse(localStorage.getItem('rentique_bookings')) || {};
+    if (!bookings[productId]) {
+        bookings[productId] = [];
+    }
+
+    bookings[productId].push({
+        startDate: startDate,
+        endDate: endDate,
+        customer: 'Admin Reserved',
+        addedBy: 'admin',
+        timestamp: new Date().toISOString()
+    });
+
+    localStorage.setItem('rentique_bookings', JSON.stringify(bookings));
+    showNotification('Unavailable period added successfully!');
+
+    // Clear inputs
+    startDateInput.value = '';
+    endDateInput.value = '';
+
+    // Refresh the bookings list
+    refreshBookingsList(productId);
+}
+
+// Remove booking from edit modal
+function removeBooking(productId, bookingIndex) {
+    const bookings = JSON.parse(localStorage.getItem('rentique_bookings')) || {};
+
+    if (bookings[productId] && bookings[productId][bookingIndex] !== undefined) {
+        bookings[productId].splice(bookingIndex, 1);
+
+        if (bookings[productId].length === 0) {
+            delete bookings[productId];
+        }
+
+        localStorage.setItem('rentique_bookings', JSON.stringify(bookings));
+        showNotification('Unavailable period removed successfully!');
+
+        // Refresh the bookings list
+        refreshBookingsList(productId);
+    }
+}
+
+// Refresh bookings list in edit modal
+function refreshBookingsList(productId) {
+    const bookingsListDiv = document.getElementById(`bookings-list-${productId}`);
+    if (!bookingsListDiv) return;
+
+    const bookings = JSON.parse(localStorage.getItem('rentique_bookings')) || {};
+    const productBookings = bookings[productId] || [];
+
+    if (productBookings.length > 0) {
+        bookingsListDiv.innerHTML = productBookings.map((booking, index) => `
+            <div class="booking-item" style="padding: 8px; margin-bottom: 8px; background: #f5f5f5; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                <span>${new Date(booking.startDate).toLocaleDateString()} - ${new Date(booking.endDate).toLocaleDateString()}</span>
+                <button type="button" class="btn-icon" onclick="removeBooking(${productId}, ${index}); event.stopPropagation();" title="Remove" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">🗑️</button>
+            </div>
+        `).join('');
+    } else {
+        bookingsListDiv.innerHTML = '<p style="color: #666; font-size: 14px;">No unavailable dates set</p>';
     }
 }
 
