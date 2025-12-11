@@ -71,26 +71,11 @@ function switchTab(tabName) {
     }
 }
 
-// Toggle subcategory field based on category
-function toggleSubcategory() {
-    const category = document.getElementById('product-category').value;
-    const subcategoryRow = document.getElementById('subcategory-row');
-    const subcategorySelect = document.getElementById('product-subcategory');
-
-    if (category === 'women') {
-        subcategorySelect.required = false;
-    } else {
-        subcategorySelect.required = false;
-        subcategorySelect.value = '';
-    }
-}
-
 // Handle add product
 async function handleAddProduct(event) {
     event.preventDefault();
 
     const name = document.getElementById('product-name').value;
-    const category = document.getElementById('product-category').value;
     const subcategory = document.getElementById('product-subcategory').value;
     const price = parseFloat(document.getElementById('product-price').value);
     const image = document.getElementById('product-image').value;
@@ -110,7 +95,8 @@ async function handleAddProduct(event) {
     const newProduct = {
         id: newId,
         name,
-        category,
+        category: 'women', // Always women's category
+        subcategory,
         price,
         image,
         description,
@@ -118,11 +104,6 @@ async function handleAddProduct(event) {
         available,
         bookedDates: []
     };
-
-    // Add subcategory if category is women
-    if (category === 'women' && subcategory) {
-        newProduct.subcategory = subcategory;
-    }
 
     customProducts.push(newProduct);
     localStorage.setItem('rentique_custom_products', JSON.stringify(customProducts));
@@ -203,20 +184,8 @@ async function editProduct(productId) {
                             <input type="text" id="edit-name" value="${product.name}" required>
                         </div>
                         <div class="form-group">
-                            <label>Category *</label>
-                            <select id="edit-category" required onchange="toggleEditSubcategory()">
-                                <option value="women" ${product.category === 'women' ? 'selected' : ''}>Women</option>
-                                <option value="men" ${product.category === 'men' ? 'selected' : ''}>Men</option>
-                                <option value="kiddies" ${product.category === 'kiddies' ? 'selected' : ''}>Kiddies</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Subcategory (for Women)</label>
-                            <select id="edit-subcategory">
-                                <option value="">None</option>
+                            <label>Subcategory *</label>
+                            <select id="edit-subcategory" required>
                                 <option value="evening" ${product.subcategory === 'evening' ? 'selected' : ''}>Evening</option>
                                 <option value="cocktail" ${product.subcategory === 'cocktail' ? 'selected' : ''}>Cocktail</option>
                                 <option value="casual" ${product.subcategory === 'casual' ? 'selected' : ''}>Casual</option>
@@ -224,9 +193,16 @@ async function editProduct(productId) {
                                 <option value="party" ${product.subcategory === 'party' ? 'selected' : ''}>Party</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label>Price (₱) *</label>
                             <input type="number" id="edit-price" value="${product.price}" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <input type="text" value="Women" disabled style="opacity: 0.6;">
                         </div>
                     </div>
 
@@ -270,24 +246,11 @@ async function editProduct(productId) {
         e.preventDefault();
         saveProductEdit(productId);
     });
-
-    toggleEditSubcategory();
-}
-
-// Toggle subcategory in edit form
-function toggleEditSubcategory() {
-    const category = document.getElementById('edit-category').value;
-    const subcategorySelect = document.getElementById('edit-subcategory');
-
-    if (category !== 'women') {
-        subcategorySelect.value = '';
-    }
 }
 
 // Save product edit
 function saveProductEdit(productId) {
     const name = document.getElementById('edit-name').value;
-    const category = document.getElementById('edit-category').value;
     const subcategory = document.getElementById('edit-subcategory').value;
     const price = parseFloat(document.getElementById('edit-price').value);
     const image = document.getElementById('edit-image').value;
@@ -300,20 +263,14 @@ function saveProductEdit(productId) {
     const updatedProduct = {
         ...product,
         name,
-        category,
+        category: 'women', // Always women's category
+        subcategory,
         price,
         image,
         description,
         featured,
         available
     };
-
-    // Add subcategory if category is women
-    if (category === 'women' && subcategory) {
-        updatedProduct.subcategory = subcategory;
-    } else {
-        delete updatedProduct.subcategory;
-    }
 
     // Check if product is from JSON or custom
     const customProducts = JSON.parse(localStorage.getItem('rentique_custom_products')) || [];

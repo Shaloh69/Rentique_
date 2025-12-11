@@ -95,6 +95,9 @@ async function loadProducts() {
         // Merge custom products with JSON products
         allProducts = [...allProducts, ...customProducts];
 
+        // Filter to only show women's products
+        allProducts = allProducts.filter(p => p.category === 'women');
+
         filteredProducts = [...allProducts];
         displayProducts(filteredProducts);
     } catch (error) {
@@ -141,49 +144,7 @@ function displayProducts(products) {
     });
 }
 
-// Filter products by category
-function filterByCategory(category) {
-    currentCategory = category;
-    currentSubcategory = 'all'; // Reset subcategory when changing main category
-
-    // Update active category button
-    document.querySelectorAll('.category-nav-center > ul:first-child li').forEach(li => {
-        li.classList.remove('cat-active');
-    });
-    event.target.classList.add('cat-active');
-
-    // Show/hide subcategory nav for Women
-    const subcategoryNav = document.getElementById('subcategory-nav');
-    if (subcategoryNav) {
-        if (category === 'women') {
-            subcategoryNav.style.display = 'flex';
-            // Reset subcategory active state
-            document.querySelectorAll('.subcategory-nav li').forEach(li => {
-                li.classList.remove('subcat-active');
-            });
-            document.querySelector('.subcategory-nav li[data-subcategory="all"]').classList.add('subcat-active');
-        } else {
-            subcategoryNav.style.display = 'none';
-        }
-    }
-
-    // Filter products
-    if (category === 'all') {
-        filteredProducts = [...allProducts];
-    } else {
-        filteredProducts = allProducts.filter(p => p.category === category.toLowerCase());
-    }
-
-    // Apply search filter if active
-    const searchInput = document.querySelector('.search-input');
-    if (searchInput && searchInput.value.trim()) {
-        searchProducts(searchInput.value);
-    } else {
-        displayProducts(filteredProducts);
-    }
-}
-
-// Filter products by subcategory
+// Filter products by subcategory (women's only)
 function filterBySubcategory(subcategory) {
     currentSubcategory = subcategory;
 
@@ -193,14 +154,12 @@ function filterBySubcategory(subcategory) {
     });
     event.target.classList.add('subcat-active');
 
-    // Filter products by category first
-    let categoryFiltered = allProducts.filter(p => p.category === 'women');
-
-    // Then filter by subcategory
+    // All products are already women's category
+    // Filter by subcategory
     if (subcategory === 'all') {
-        filteredProducts = categoryFiltered;
+        filteredProducts = [...allProducts];
     } else {
-        filteredProducts = categoryFiltered.filter(p => p.subcategory === subcategory);
+        filteredProducts = allProducts.filter(p => p.subcategory === subcategory);
     }
 
     // Apply search filter if active
@@ -393,16 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadProducts();
     }
 
-    // Setup category filters
-    const categoryItems = document.querySelectorAll('.category-nav-center > ul:first-child li');
-    categoryItems.forEach((item, index) => {
-        item.addEventListener('click', (e) => {
-            const categories = ['all', 'women', 'men', 'kiddies'];
-            filterByCategory(categories[index]);
-        });
-    });
-
-    // Setup subcategory filters
+    // Setup subcategory filters (women's only)
     const subcategoryItems = document.querySelectorAll('.subcategory-nav li');
     subcategoryItems.forEach((item) => {
         item.addEventListener('click', (e) => {

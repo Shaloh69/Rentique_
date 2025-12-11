@@ -420,6 +420,9 @@ async function ensureProductsLoaded() {
 
         // Merge custom products with JSON products
         allProducts = [...allProducts, ...customProducts];
+
+        // Filter to only show women's products
+        allProducts = allProducts.filter(p => p.category === 'women');
     } catch (error) {
         console.error('Error loading products:', error);
     }
@@ -460,11 +463,13 @@ async function showAdminPanel() {
                                 <input type="text" id="product-name" class="form-input" required>
                             </div>
                             <div class="form-group">
-                                <label for="product-category">Category *</label>
-                                <select id="product-category" class="form-input" required>
-                                    <option value="women">Women</option>
-                                    <option value="men">Men</option>
-                                    <option value="kiddies">Kiddies</option>
+                                <label for="product-subcategory">Subcategory *</label>
+                                <select id="product-subcategory" class="form-input" required>
+                                    <option value="evening">Evening</option>
+                                    <option value="cocktail">Cocktail</option>
+                                    <option value="casual">Casual</option>
+                                    <option value="wedding">Wedding</option>
+                                    <option value="party">Party</option>
                                 </select>
                             </div>
                         </div>
@@ -542,7 +547,7 @@ function handleAddProduct(event) {
     event.preventDefault();
 
     const name = document.getElementById('product-name').value;
-    const category = document.getElementById('product-category').value;
+    const subcategory = document.getElementById('product-subcategory').value;
     const price = parseFloat(document.getElementById('product-price').value);
     const image = document.getElementById('product-image').value;
     const description = document.getElementById('product-description').value;
@@ -557,7 +562,8 @@ function handleAddProduct(event) {
     const newProduct = {
         id: newId,
         name,
-        category,
+        category: 'women', // Always women's category
+        subcategory,
         price,
         image,
         description,
@@ -601,7 +607,7 @@ function loadAdminProducts() {
             <img src="${product.image}?t=${timestamp}" alt="${product.name}" onerror="this.src='images/logo.png'">
             <div class="admin-product-details">
                 <h4>${product.name}</h4>
-                <p>${product.category} - $${product.price.toFixed(2)}</p>
+                <p>${product.subcategory ? product.subcategory.charAt(0).toUpperCase() + product.subcategory.slice(1) : 'Women'} - $${product.price.toFixed(2)}</p>
                 <small>${product.description}</small>
                 ${product.custom ? '<span class="custom-badge">Custom</span>' : '<span class="original-badge">Original</span>'}
             </div>
@@ -674,11 +680,13 @@ function editProduct(productId) {
                             <input type="text" id="edit-product-name" class="form-input" value="${product.name}" required>
                         </div>
                         <div class="form-group">
-                            <label for="edit-product-category">Category *</label>
-                            <select id="edit-product-category" class="form-input" required>
-                                <option value="women" ${product.category === 'women' ? 'selected' : ''}>Women</option>
-                                <option value="men" ${product.category === 'men' ? 'selected' : ''}>Men</option>
-                                <option value="kiddies" ${product.category === 'kiddies' ? 'selected' : ''}>Kiddies</option>
+                            <label for="edit-product-subcategory">Subcategory *</label>
+                            <select id="edit-product-subcategory" class="form-input" required>
+                                <option value="evening" ${product.subcategory === 'evening' ? 'selected' : ''}>Evening</option>
+                                <option value="cocktail" ${product.subcategory === 'cocktail' ? 'selected' : ''}>Cocktail</option>
+                                <option value="casual" ${product.subcategory === 'casual' ? 'selected' : ''}>Casual</option>
+                                <option value="wedding" ${product.subcategory === 'wedding' ? 'selected' : ''}>Wedding</option>
+                                <option value="party" ${product.subcategory === 'party' ? 'selected' : ''}>Party</option>
                             </select>
                         </div>
                     </div>
@@ -729,7 +737,7 @@ function handleEditProduct(event, productId) {
     event.preventDefault();
 
     const name = document.getElementById('edit-product-name').value;
-    const category = document.getElementById('edit-product-category').value;
+    const subcategory = document.getElementById('edit-product-subcategory').value;
     const price = parseFloat(document.getElementById('edit-product-price').value);
     const image = document.getElementById('edit-product-image').value;
     const description = document.getElementById('edit-product-description').value;
@@ -746,7 +754,8 @@ function handleEditProduct(event, productId) {
             customProducts[index] = {
                 ...customProducts[index],
                 name,
-                category,
+                category: 'women',
+                subcategory,
                 price,
                 image,
                 description,
@@ -762,7 +771,8 @@ function handleEditProduct(event, productId) {
         const editedProduct = {
             id: productId,
             name,
-            category,
+            category: 'women',
+            subcategory,
             price,
             image,
             description,
@@ -785,7 +795,8 @@ function handleEditProduct(event, productId) {
         allProducts[productIndex] = {
             ...allProducts[productIndex],
             name,
-            category,
+            category: 'women',
+            subcategory,
             price,
             image,
             description,

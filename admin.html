@@ -89,20 +89,8 @@
                     <input type="text" id="product-name" required>
                   </div>
                   <div class="form-group">
-                    <label for="product-category">Category *</label>
-                    <select id="product-category" required onchange="toggleSubcategory()">
-                      <option value="women">Women</option>
-                      <option value="men">Men</option>
-                      <option value="kiddies">Kiddies</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="form-row" id="subcategory-row">
-                  <div class="form-group">
-                    <label for="product-subcategory">Subcategory (for Women)</label>
-                    <select id="product-subcategory">
-                      <option value="">None</option>
+                    <label for="product-subcategory">Subcategory *</label>
+                    <select id="product-subcategory" required>
                       <option value="evening">Evening</option>
                       <option value="cocktail">Cocktail</option>
                       <option value="casual">Casual</option>
@@ -110,9 +98,16 @@
                       <option value="party">Party</option>
                     </select>
                   </div>
+                </div>
+
+                <div class="form-row">
                   <div class="form-group">
                     <label for="product-price">Price (₱) *</label>
                     <input type="number" id="product-price" step="0.01" min="0" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="product-image-preview">Preview</label>
+                    <div style="min-height: 40px;"></div>
                   </div>
                 </div>
 
