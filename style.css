@@ -1442,6 +1442,7 @@ input:focus {
 /* User Menu */
 .user-menu {
   position: relative;
+  z-index: 1001;
 }
 
 .user-dropdown {
@@ -1457,7 +1458,7 @@ input:focus {
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.3s ease;
-  z-index: 1000;
+  z-index: 1001;
 }
 
 .user-dropdown.active {
