@@ -489,10 +489,14 @@ function setupNavigation() {
     const navItems = document.querySelectorAll('.topnav li');
 
     navItems.forEach(item => {
+        item.style.cursor = 'pointer';
         item.addEventListener('click', () => {
             const text = item.textContent.trim().toLowerCase();
 
             switch(text) {
+                case 'home':
+                    window.location.href = 'index.html';
+                    break;
                 case 'products':
                     window.location.href = 'products.html';
                     break;
@@ -901,6 +905,34 @@ async function loadFeaturedProductsForHome() {
             missionImage.onerror = function() {
                 this.src = 'images/logo.png';
             };
+        }
+
+        // Update "Why Choose Us" section images with 3 random products
+        const whyChooseImage1 = document.getElementById('whychoose-image-1');
+        const whyChooseImage2 = document.getElementById('whychoose-image-2');
+        const whyChooseImage3 = document.getElementById('whychoose-image-3');
+
+        if (whyChooseImage1 && whyChooseImage2 && whyChooseImage3) {
+            // Get 3 different random products
+            const shuffled = [...productsToUse].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, Math.min(3, shuffled.length));
+
+            // Ensure we have at least 3 products (repeat if necessary)
+            while (selected.length < 3) {
+                selected.push(productsToUse[Math.floor(Math.random() * productsToUse.length)]);
+            }
+
+            whyChooseImage1.src = selected[0].image;
+            whyChooseImage1.alt = selected[0].name;
+            whyChooseImage1.onerror = function() { this.src = 'images/logo.png'; };
+
+            whyChooseImage2.src = selected[1].image;
+            whyChooseImage2.alt = selected[1].name;
+            whyChooseImage2.onerror = function() { this.src = 'images/logo.png'; };
+
+            whyChooseImage3.src = selected[2].image;
+            whyChooseImage3.alt = selected[2].name;
+            whyChooseImage3.onerror = function() { this.src = 'images/logo.png'; };
         }
     } catch (error) {
         console.error('Error loading featured products:', error);

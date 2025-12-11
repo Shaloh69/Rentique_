@@ -10,6 +10,10 @@ async function loadUsers() {
         const response = await fetch('data/users.json');
         const data = await response.json();
         allUsers = data.users;
+
+        // Load registered users from localStorage
+        const registeredUsers = JSON.parse(localStorage.getItem('rentique_registered_users')) || [];
+        allUsers = [...allUsers, ...registeredUsers];
     } catch (error) {
         console.error('Error loading users:', error);
     }
@@ -60,6 +64,49 @@ async function login(email, password) {
     }
 }
 
+// Register function
+async function register(name, email, password) {
+    // Ensure users are loaded
+    if (allUsers.length === 0) {
+        await loadUsers();
+    }
+
+    // Check if user already exists
+    const existingUser = allUsers.find(u => u.email === email);
+
+    if (existingUser) {
+        return { success: false, message: 'An account with this email already exists' };
+    }
+
+    // Get registered users from localStorage
+    let registeredUsers = JSON.parse(localStorage.getItem('rentique_registered_users')) || [];
+
+    // Check if already registered in localStorage
+    const alreadyRegistered = registeredUsers.find(u => u.email === email);
+    if (alreadyRegistered) {
+        return { success: false, message: 'An account with this email already exists' };
+    }
+
+    // Generate new user ID
+    const newId = Math.max(...allUsers.map(u => u.id), ...registeredUsers.map(u => u.id), 0) + 1;
+
+    const newUser = {
+        id: newId,
+        name: name,
+        email: email,
+        password: password,
+        role: 'user'
+    };
+
+    registeredUsers.push(newUser);
+    localStorage.setItem('rentique_registered_users', JSON.stringify(registeredUsers));
+
+    // Add to allUsers array
+    allUsers.push(newUser);
+
+    return { success: true, message: 'Registration successful! Please log in.' };
+}
+
 // Logout function
 function logout() {
     currentUser = null;
@@ -108,6 +155,9 @@ function showLoginModal() {
                         <p>Admin: admin@rentique.com / admin123</p>
                         <p>User: user@rentique.com / user123</p>
                     </div>
+                    <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                        <p>Don't have an account? <a href="#" onclick="event.preventDefault(); closeLoginModal(); showRegisterModal();" style="color: #8b6f47; text-decoration: underline;">Register here</a></p>
+                    </div>
                 </form>
             </div>
         </div>
@@ -147,6 +197,120 @@ async function handleLogin(event) {
         // Reload page to update UI
         setTimeout(() => {
             window.location.reload();
+        }, 1000);
+    } else {
+        errorDiv.textContent = result.message;
+        errorDiv.style.display = 'block';
+    }
+}
+
+// Show register modal
+function showRegisterModal() {
+    const modal = document.createElement('div');
+    modal.className = 'product-modal';
+    modal.id = 'register-modal';
+    modal.innerHTML = `
+        <div class="modal-overlay" onclick="closeRegisterModal()"></div>
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeRegisterModal()">&times;</button>
+            <div class="login-modal">
+                <h2 class="modal-title">Create Your Account</h2>
+                <form class="login-form" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="register-name">Full Name</label>
+                        <input
+                            type="text"
+                            id="register-name"
+                            class="form-input"
+                            placeholder="Enter your full name"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email Address</label>
+                        <input
+                            type="email"
+                            id="register-email"
+                            class="form-input"
+                            placeholder="Enter your email"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input
+                            type="password"
+                            id="register-password"
+                            class="form-input"
+                            placeholder="Create a password"
+                            required
+                            minlength="6"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm-password">Confirm Password</label>
+                        <input
+                            type="password"
+                            id="register-confirm-password"
+                            class="form-input"
+                            placeholder="Confirm your password"
+                            required
+                            minlength="6"
+                        >
+                    </div>
+                    <div id="register-error" class="login-error"></div>
+                    <button type="submit" class="btn-order-large">Register</button>
+                    <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                        <p>Already have an account? <a href="#" onclick="event.preventDefault(); closeRegisterModal(); showLoginModal();" style="color: #8b6f47; text-decoration: underline;">Login here</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+// Close register modal
+function closeRegisterModal() {
+    const modal = document.getElementById('register-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.remove();
+            document.body.style.overflow = '';
+        }, 300);
+    }
+}
+
+// Handle register form submission
+async function handleRegister(event) {
+    event.preventDefault();
+
+    const name = document.getElementById('register-name').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    const confirmPassword = document.getElementById('register-confirm-password').value;
+    const errorDiv = document.getElementById('register-error');
+
+    // Validate passwords match
+    if (password !== confirmPassword) {
+        errorDiv.textContent = 'Passwords do not match';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    const result = await register(name, email, password);
+
+    if (result.success) {
+        closeRegisterModal();
+        showNotification(result.message);
+
+        // Show login modal after successful registration
+        setTimeout(() => {
+            showLoginModal();
         }, 1000);
     } else {
         errorDiv.textContent = result.message;
